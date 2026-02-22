@@ -7,7 +7,6 @@ library;
 
 import 'dart:io';
 
-import '../constants.dart';
 import '../domain/models.dart';
 
 bool get _color => stdout.supportsAnsiEscapes;
