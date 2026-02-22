@@ -1,0 +1,14 @@
+name: pub_doctor_example
+description: Example usage of pub_doctor.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+executables:
+  usage: usage
+
+dependencies:
+  pub_doctor:
+    path: ../

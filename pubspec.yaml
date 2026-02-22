@@ -1,0 +1,48 @@
+name: pub_doctor
+description: Dependency health diagnostics and risk scoring for Dart & Flutter projects.
+version: 0.0.1
+repository: https://github.com/Sahad2701/pub_doctor
+issue_tracker: https://github.com/Sahad2701/pub_doctor/issues
+documentation: https://pub.dev/documentation/pub_doctor/latest/
+
+topics:
+  - dart
+  - flutter
+  - cli
+  - dependency-analysis
+  - dependency-management
+
+icon: icon.png
+
+screenshots:
+  - description: 'Running pub_doctor health check on a terminal'
+    path: screenshots/run.png
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  args: ^2.4.2
+  yaml: ^3.1.2
+  http: ^1.2.0
+  pub_semver: ^2.1.4
+  path: ^1.9.0
+  collection: ^1.18.0
+  crypto: ^3.0.3
+  lints: ^3.0.0
+
+dev_dependencies:
+  test: ^1.24.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+
+executables:
+  pub_doctor: pub_doctor

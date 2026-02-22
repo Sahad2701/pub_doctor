@@ -1,0 +1,116 @@
+name: Release
+
+# Manual dispatch only — triggered from the GitHub Actions tab.
+#
+# Required secrets:
+#   PUB_CREDENTIALS  – contents of ~/.pub-cache/credentials.json after running
+#                      `dart pub login` locally (base64-encoded JSON string).
+#
+# The workflow will:
+#   1. Run full CI (format, analyze, test).
+#   2. Bump the version in pubspec.yaml and lib/constants.dart.
+#   3. Commit the version bump and push to main.
+#   4. Create and push a git tag (v<version>).
+#   5. Publish to pub.dev using the PUB_CREDENTIALS secret.
+#   6. Create a GitHub Release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to bump to."
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Release v${{ inputs.version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to push commits and tags
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ubuntu-latest-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: ubuntu-latest-pub-
+
+      - name: Install dependencies
+        run: dart pub get
+
+      # ─ CI gates
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        run: dart analyze --fatal-infos --fatal-warnings
+
+      - name: Run tests
+        run: dart test
+
+      - name: Pub publish dry-run
+        run: dart pub publish --dry-run
+
+      # ─ Version bump
+
+      - name: Bump version in pubspec.yaml
+        run: |
+          VERSION="${{ inputs.version }}"
+          sed -i "s/^version: .*/version: $VERSION/" pubspec.yaml
+
+      - name: Bump version in lib/constants.dart
+        run: |
+          VERSION="${{ inputs.version }}"
+          sed -i "s/static const String version = '.*';/static const String version = '$VERSION';/" lib/constants.dart
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push version bump
+        run: |
+          VERSION="${{ inputs.version }}"
+          git add pubspec.yaml lib/constants.dart
+          git commit -m "chore: release v$VERSION"
+          git push origin main
+
+      - name: Create and push git tag
+        run: |
+          VERSION="${{ inputs.version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      # ─ Publish to pub.dev
+
+      - name: Write pub.dev credentials
+        run: |
+          mkdir -p "$HOME/.pub-cache"
+          echo "${{ secrets.PUB_CREDENTIALS }}" | base64 -d > "$HOME/.pub-cache/credentials.json"
+
+      - name: Publish to pub.dev
+        run: dart pub publish --force
+
+      # ─ GitHub Release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.version }}"
+          name: "v${{ inputs.version }}"
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

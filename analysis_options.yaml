@@ -1,0 +1,25 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  errors:
+    missing_required_param: error
+    missing_return: error
+    dead_code: warning
+  exclude:
+    - "**/*.g.dart"
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_empty_else
+    - avoid_print
+    - avoid_redundant_argument_values
+    - cancel_subscriptions
+    - close_sinks
+    - directives_ordering
+    - prefer_const_constructors
+    - prefer_final_locals
+    - prefer_relative_imports
+    - unawaited_futures
+    - unnecessary_lambdas
+    - use_super_parameters
