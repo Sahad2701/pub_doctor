@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:pub_semver/pub_semver.dart';
 
+import '../constants.dart';
 import '../data/cache.dart';
 import '../data/github_client.dart';
 import '../data/pub_api_client.dart';
 import '../data/pubspec_parser.dart';
 import '../doctor_engine/scorer.dart';
 import '../domain/models.dart';
+import 'alternative_service.dart';
 
 /// Configuration for a [ScanService.scan] run.
 class ScanOptions {
@@ -48,6 +50,7 @@ class ScanService {
   final DiskCache _cache;
   PubApiClient? _pub;
   GitHubClient? _gh;
+  AlternativeService? _alt;
 
   Future<ProjectDiagnosis> scan(String pubspecPath, ScanOptions opts) async {
     final info = await PubspecParser().parse(pubspecPath);
@@ -84,15 +87,66 @@ class ScanService {
 
     final scorer =
         RiskScorer(dartSdkVersion: sdk, repoReachability: repoReachability);
-    final results = meta.values.map(scorer.diagnose).toList()
+    var results = meta.values.map(scorer.diagnose).toList()
       ..sort((a, b) => b.riskScore.compareTo(a.riskScore));
+
+    // For any high-risk package, try to find alternatives if online
+    if (!opts.offline) {
+      _alt ??= AlternativeService(_pub!);
+      results = await Future.wait(results.map((r) async {
+        if (r.riskLevel == RiskLevel.critical ||
+            r.riskLevel == RiskLevel.risky) {
+          final originalMeta = meta[r.packageName];
+          if (originalMeta != null) {
+            final alternatives =
+                await _alt!.findBetterAlternatives(originalMeta);
+            if (alternatives.isNotEmpty) {
+              return DiagnosisResult(
+                packageName: r.packageName,
+                currentVersion: r.currentVersion,
+                latestVersion: r.latestVersion,
+                riskScore: r.riskScore,
+                riskLevel: r.riskLevel,
+                signals: r.signals,
+                recommendations: r.recommendations,
+                suggestedAlternatives: alternatives,
+                verification: r.verification,
+                repoHealth: r.repoHealth,
+                isFromCache: r.isFromCache,
+              );
+            }
+          }
+        }
+        return r;
+      }));
+    }
+
+    String? latestToolVersion;
+
+    if (!opts.offline) {
+      latestToolVersion = await _checkSelfUpdate();
+    }
 
     return ProjectDiagnosis(
       results: results,
       scannedAt: DateTime.now(),
       pubspecPath: pubspecPath,
       dartSdkVersion: sdk?.toString(),
+      latestToolVersion: latestToolVersion,
     );
+  }
+
+  Future<String?> _checkSelfUpdate() async {
+    try {
+      _pub ??= PubApiClient(cache: _cache);
+      final meta = await _pub!.fetch(
+        name: 'pub_doctor',
+        currentVersion: Version.parse(Package.version),
+      );
+      return meta?.latestStableVersion?.toString();
+    } catch (_) {
+      return null;
+    }
   }
 
   void dispose() {

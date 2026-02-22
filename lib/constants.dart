@@ -6,7 +6,7 @@ library;
 /// Package-level metadata baked in at build time.
 abstract class Package {
   /// The current version of pub_doctor, kept in sync with `pubspec.yaml`.
-  static const String version = '0.0.1';
+  static const String version = '0.0.2';
 }
 
 /// Base URLs for the external APIs pub_doctor talks to.

@@ -9,13 +9,12 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:http/http.dart' as http;
 
 import '../constants.dart';
 import '../domain/models.dart';
 import 'cache.dart';
+import 'platform_helper.dart';
 
 /// Wraps the GitHub API and converts raw JSON into [RepoHealth] objects.
 class GitHubClient {
@@ -78,7 +77,7 @@ class GitHubClient {
       'Accept': 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
     };
-    final token = Platform.environment['GITHUB_TOKEN'];
+    final token = getEnv('GITHUB_TOKEN');
     if (token != null) headers['Authorization'] = 'Bearer $token';
 
     try {
@@ -88,7 +87,7 @@ class GitHubClient {
 
       if (res.statusCode == 200) return json.decode(res.body);
       if (res.statusCode == 403 || res.statusCode == 429) {
-        stderr.writeln(
+        writeStderr(
             '  [pub_doctor] GitHub rate limit hit. Set GITHUB_TOKEN for 5000 req/hr.');
       }
       return null;

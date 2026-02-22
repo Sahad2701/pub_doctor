@@ -1,0 +1,19 @@
+# Exclude build artifacts and IDE files
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Exclude OS-specific files
+.DS_Store
+
+# Exclude IDE specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Screenshots and icons are used in pubspec.yaml, so keep them.
+# screenshots/
+# icon.png

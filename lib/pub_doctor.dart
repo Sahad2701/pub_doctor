@@ -8,8 +8,9 @@
 /// can drive [RiskScorer] directly.
 library pub_doctor;
 
-export 'application/scan_service.dart';
-export 'cli/reporter.dart';
+export 'application/scan_service.dart'
+    if (dart.library.js_interop) 'constants.dart';
+export 'cli/reporter.dart' if (dart.library.js_interop) 'constants.dart';
 export 'constants.dart';
 export 'data/cache.dart';
 export 'doctor_engine/scorer.dart';

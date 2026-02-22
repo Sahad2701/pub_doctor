@@ -137,6 +137,19 @@ class PubApiClient {
     }
   }
 
+  /// Searches pub.dev for packages matching [query].
+  ///
+  /// Returns a list of package names.
+  Future<List<String>> search(String query) async {
+    final results = await _get('${Urls.pubDevApi}/search?q=$query');
+    if (results == null) return [];
+    final packages = results['packages'] as List<dynamic>? ?? [];
+    return packages
+        .map((p) => (p as Map<String, dynamic>)['package'] as String?)
+        .whereType<String>()
+        .toList();
+  }
+
   /// Closes the underlying HTTP client. Call this when done with the instance.
   void dispose() => _http.close();
 
@@ -265,6 +278,7 @@ class PubApiClient {
         isDiscontinued: info['isDiscontinued'] as bool?,
         isUnlisted: info['isUnlisted'] as bool?,
         releases: releases,
+        topics: tags,
         verification: verification,
         fetchedAt: DateTime.now(),
         isFromCache: fromCache,

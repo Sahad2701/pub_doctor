@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.2]
+
+* **Tool Self-Update Awareness**: The CLI now automatically checks for updates to `pub_doctor` itself and notifies you when a newer version is available.
+* **Alternative Package Suggestions**: High-risk dependencies now automatically suggest healthier, better-maintained alternatives from pub.dev.
+* **WASM Compatibility**: Fully refactored core architecture to support `dart2wasm` and web platforms while maintaining CLI performance.
+
+
 ## [0.0.1] — Initial Release
 
 

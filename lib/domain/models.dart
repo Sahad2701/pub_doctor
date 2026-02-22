@@ -154,6 +154,7 @@ class PackageMetadata {
     this.isDiscontinued,
     this.isUnlisted,
     this.releases = const [],
+    this.topics = const [],
     this.verification = PackageVerification.none,
     this.repoHealth,
     this.fetchedAt,
@@ -208,6 +209,9 @@ class PackageMetadata {
   /// Full release history, sorted newest-first.
   final List<Release> releases;
 
+  /// Topics/Tags associated with the package on pub.dev.
+  final List<String> topics;
+
   /// pub.dev publisher verification and Flutter Favourite status.
   final PackageVerification verification;
 
@@ -250,6 +254,7 @@ class PackageMetadata {
         isDiscontinued: isDiscontinued,
         isUnlisted: isUnlisted,
         releases: releases,
+        topics: topics,
         verification: verification,
         repoHealth: repoHealth ?? this.repoHealth,
         fetchedAt: fetchedAt,
@@ -297,6 +302,7 @@ class DiagnosisResult {
     required this.riskLevel,
     required this.signals,
     required this.recommendations,
+    this.suggestedAlternatives = const [],
     required this.verification,
     required this.repoHealth,
     required this.isFromCache,
@@ -323,6 +329,9 @@ class DiagnosisResult {
   /// Ordered list of human-readable action items.
   final List<String> recommendations;
 
+  /// Healthier alternatives for high-risk packages.
+  final List<String> suggestedAlternatives;
+
   /// Publisher verification and Flutter Favourite status.
   final PackageVerification verification;
 
@@ -345,6 +354,7 @@ class ProjectDiagnosis {
     required this.scannedAt,
     required this.pubspecPath,
     this.dartSdkVersion,
+    this.latestToolVersion,
   });
 
   /// Per-package results, sorted by descending risk score.
@@ -358,6 +368,9 @@ class ProjectDiagnosis {
 
   /// Dart SDK version string detected on the host machine, if available.
   final String? dartSdkVersion;
+
+  /// Latest available version of pub_doctor on pub.dev.
+  final String? latestToolVersion;
 
   /// Total number of packages evaluated.
   int get totalPackages => results.length;

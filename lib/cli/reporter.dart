@@ -7,6 +7,9 @@ library;
 
 import 'dart:io';
 
+import 'package:pub_semver/pub_semver.dart';
+
+import '../constants.dart';
 import '../domain/models.dart';
 
 bool get _color => stdout.supportsAnsiEscapes;
@@ -133,6 +136,12 @@ class CliReporter {
       }
     }
 
+    if (r.suggestedAlternatives.isNotEmpty) {
+      stdout.writeln();
+      stdout.writeln(_g(
+          '    ✨ Healthier alternatives: ${r.suggestedAlternatives.join(', ')}'));
+    }
+
     stdout.writeln();
   }
 
@@ -159,6 +168,22 @@ class CliReporter {
       stdout.writeln(_b(
           '  💡 Tip: $outdatedCount dependencies are outdated. Run `pub_doctor update` to safely auto-resolve them.'));
     }
+
+    // Suggest updating the tool itself if a newer version is available.
+    if (d.latestToolVersion != null) {
+      try {
+        final latest = Version.parse(d.latestToolVersion!);
+        final current = Version.parse(Package.version);
+        if (latest > current) {
+          stdout.writeln();
+          stdout.writeln(
+              _c('  🚀 A new version of pub_doctor ($latest) is available!'));
+          stdout.writeln(
+              _c('     Run: dart pub global activate pub_doctor to update.'));
+        }
+      } catch (_) {}
+    }
+
     stdout.writeln();
   }
 
