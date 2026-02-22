@@ -30,8 +30,8 @@ class AlternativeService {
       if (name == original.name) continue;
 
       try {
-        final meta = await _api.fetch(
-            name: name, currentVersion: Version(0, 0, 0));
+        final meta =
+            await _api.fetch(name: name, currentVersion: Version(0, 0, 0));
         if (meta == null) continue;
 
         final diagnosis = scorer.diagnose(meta);

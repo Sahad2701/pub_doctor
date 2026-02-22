@@ -6,7 +6,7 @@
 ///
 /// Typical entry-point for CLI consumers is [ScanService]. Library consumers
 /// can drive [RiskScorer] directly.
-library pub_doctor;
+library;
 
 export 'application/scan_service.dart'
     if (dart.library.js_interop) 'constants.dart';
